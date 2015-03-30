@@ -3,10 +3,10 @@
 var CartesianViewport = (function () {
     function CartesianViewport() {
         if (arguments.length == 0) {
-            this.minX = -5;
-            this.maxX = 5;
-            this.minY = -5;
-            this.maxY = 5;
+            this.minX = -10;
+            this.maxX = 10;
+            this.minY = -10;
+            this.maxY = 10;
         }
         else if (arguments.length == 4) {
             this.minX = arguments[0];
@@ -35,6 +35,17 @@ var CartesianViewport = (function () {
 var functions = [];
 var cartesianBounds = new CartesianViewport();
 var mouseX = -1;
+// read cartesianBounds out of url if passed
+(function () {
+    var serialised = getURLParameter('cartesianBounds');
+    if (serialised) {
+        var temp = JSON.parse(serialised);
+        cartesianBounds.minX = temp.minX;
+        cartesianBounds.maxX = temp.maxX;
+        cartesianBounds.minY = temp.minY;
+        cartesianBounds.maxY = temp.maxY;
+    }
+});
 // take an expression, with only 'x' as a variable and a list of values for 'x' and return a list of points
 function expressionToPlotPoints(expression, xValues) {
     var parser = math.parser();
@@ -132,13 +143,15 @@ function drawVerticalIntersectionLine(cxt) {
         cxt.stroke();
         // print all x and f(x) values at the line next to the line
         var viewportWidth = Math.abs(cartesianBounds.maxX - cartesianBounds.minX);
-        var xValue = mouseX / cWidth * viewportWidth + cartesianBounds.minX; // cartesian x value for mouseX TODO: fix
-        var printList = [];
-        var width = 0;
+        var xValue = mouseX / cWidth * viewportWidth + cartesianBounds.minX; // cartesian x value for mouseX
+        var lineHeight = 15;
+        cxt.font = 14 + "px sans-serif";
+        var printList = [{ string: "x = " + xValue.toPrecision(4), colour: '#000' }];
+        var width = Math.ceil(cxt.measureText(printList[printList.length - 1].string).width);
         for (var i = 0; i < functions.length; ++i) {
             try {
                 var p = expressionToPlotPoint(functions[i].expression, xValue);
-                printList.push({ string: "x: " + p.x.toPrecision(4) + ", f(x): " + p.y.toPrecision(4), colour: functions[i].colour });
+                printList.push({ string: "f(x) = " + p.y.toPrecision(4), colour: functions[i].colour });
                 width = Math.max(width, Math.ceil(cxt.measureText(printList[printList.length - 1].string).width));
             }
             catch (e) {
@@ -146,16 +159,12 @@ function drawVerticalIntersectionLine(cxt) {
             }
         }
         //console.log(printList);
-        if (printList.length > 0) {
-            var leftOfLine = mouseX >= width; // if true print strings on left side of line, else right side
-            var lineHeight = 15;
-            var currectYInCanvas = 14;
-            cxt.font = 12 + "px sans-serif";
-            for (var i = 0; i < printList.length; ++i) {
-                cxt.fillStyle = printList[i].colour;
-                cxt.fillText(printList[i].string, leftOfLine ? (mouseX - width) : mouseX, currectYInCanvas);
-                currectYInCanvas += lineHeight;
-            }
+        var leftOfLine = mouseX >= width + 2; // if true print strings on left side of line, else right side
+        var currectYInCanvas = 14;
+        for (var i = 0; i < printList.length; ++i) {
+            cxt.fillStyle = printList[i].colour;
+            cxt.fillText(printList[i].string, leftOfLine ? (mouseX - width - 2) : mouseX + 2, currectYInCanvas);
+            currectYInCanvas += lineHeight;
         }
         cxt.restore();
     }
@@ -178,11 +187,13 @@ function canvasPointToCartesian(viewport, cWidth, cHeight, canvaspoint) {
     var viewportHeight = Math.abs(viewport.maxY - viewport.minY);
     // TODO: finish
     return {
-        x: 0,
+        x: canvaspoint.x / cWidth * viewportWidth + cartesianBounds.minX,
         y: 0
     };
 }
 function paint() {
+    if (!cartesianBounds.isValid())
+        return;
     var cxt = document.getElementById('plotCanvas').getContext('2d');
     cxt.clearRect(0, 0, cxt.canvas.width, cxt.canvas.height);
     drawAxes(cxt);
@@ -196,7 +207,7 @@ function update() {
 }
 // Ajdust the canvas size to take up optimal space. If the size is changed the graphs will be redrawn.
 function fixCanvasSize() {
-    var newSize = Math.max(Math.min(document.getElementById('plotCanvasHolder').clientWidth, window.innerHeight - $('#page-header>*').outerHeight(true) - $('#controls').outerHeight(true)) & 0xfffffff0, 192);
+    var newSize = Math.max(Math.min(document.getElementById('plotCanvasHolder').clientWidth, window.innerHeight - $('#page-header>*').outerHeight(true) - $('#controls').outerHeight(true)) & 0xfffffff0, 224);
     var canvas = document.getElementById('plotCanvas');
     if (canvas.width != newSize) {
         canvas.width = newSize;
@@ -205,31 +216,25 @@ function fixCanvasSize() {
     }
 }
 $(document).ready(function () {
-    $("#cartesianBoundsInput").submit(function () {
-        if ($("#minX")[0].checkValidity() && $("#maxX")[0].checkValidity() && $("#minY")[0].checkValidity() && $("#maxY")[0].checkValidity()) {
-            var minX = parseFloat($("#minX").val()), maxX = parseFloat($("#maxX").val()), minY = parseFloat($("#minY").val()), maxY = parseFloat($("#maxY").val());
-            cartesianBounds = new CartesianViewport(minX, maxX, minY, maxY);
-            update();
-        }
-        return false;
-    });
-    // read cartesianBounds out of url if passed
-    var serialised = getURLParameter('cartesianBounds');
-    if (serialised) {
-        var temp = JSON.parse(serialised);
-        cartesianBounds.minX = temp.minX;
-        cartesianBounds.maxX = temp.maxX;
-        cartesianBounds.minY = temp.minY;
-        cartesianBounds.maxY = temp.maxY;
-    }
+    var checkMinMax = function () {
+        var temp = new CartesianViewport(parseFloat(document.getElementById('minX').value), parseFloat(document.getElementById('maxX').value), parseFloat(document.getElementById('minY').value), parseFloat(document.getElementById('maxY').value));
+        document.getElementById('minMaxErrorMessage').hidden = temp.isValid();
+    };
+    var updateCartesianBoundsModel = function () {
+        cartesianBounds[this.getAttribute('id')] = parseFloat(this.value);
+        update();
+    };
+    $("#minX, #maxX, #minY, #maxY").on('input', checkMinMax);
+    $("#minX, #maxX, #minY, #maxY").on('input', updateCartesianBoundsModel);
     updateCartesianBoundsView();
     fixCanvasSize();
     document.getElementById('plotCanvas').onwheel = function (event) {
-        //var mousex = event.clientX - canvas.offsetLeft;
-        //var mousey = event.clientY - canvas.offsetTop;
         var wheel = event.deltaY / 120; //n or -n
-        var zoom = 1 + wheel / 2;
+        console.log(event.deltaMode);
+        //console.log(wheel);
+        var zoom = Math.pow(2, wheel);
         console.log(zoom);
+        //console.log(zoom);
         cartesianBounds.zoom(zoom);
         updateCartesianBoundsView();
         update();
@@ -286,6 +291,7 @@ function deleteFunction(singleFunctionView) {
     var indexInFunctions = $singleFunctionView.prevAll('div').length; // number of previous siblings is equal to index in functions array
     $singleFunctionView.remove();
     functions.splice(indexInFunctions, 1);
+    fixCanvasSize();
     update();
 }
 // originally from http://www.jquerybyexample.net/2012/06/get-url-parameters-using-jquery.html, edited

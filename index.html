@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<meta name="description" content="">
 	<link rel="icon" href="img/favicon.ico">
 
@@ -27,8 +27,6 @@
 	<!-- bootstrap -->
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-	<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
 	
     <!-- moustachejs -->
     <script src ="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
@@ -49,45 +47,33 @@
 			<h1>Graph Plotter</h1>
 		</header>
 
-
-        <div id="plotCanvasHolder"><canvas id="plotCanvas"></canvas></div>
+        <div id="plotCanvasHolder">
+			<canvas id="plotCanvas"></canvas>
+		</div>
 
         <div id="controls">
-		<form id="cartesianBoundsInput" name="cartesianBoundsInput">
-            <label for="minX">Min x:</label> <input id="minX" type="number" step="any" oninput="checkMinMax(this)" title="Smallest x to display" required/>
-            <label for="maxX">Max x:</label> <input id="maxX" type="number" step="any" oninput="checkMinMax(this)" title="Largest x to display" required/>
-			<label for="minY">Min f(x):</label> <input id="minY" type="number" step="any" oninput="checkMinMax(this)" title="Smallest f(x) to display" required/>
-            <label for="maxY">Max f(x):</label> <input id="maxY" type="number" step="any" oninput="checkMinMax(this)" title="Largest f(x) to display" required/>
-			<input id="updateBounds" type="submit" value="update" />
-		</form>
-
-		<script>
-		function checkMinMax(inputToCheck) {
-			if(inputToCheck.validity.valid)
-				return;
-			
-			var minNode = document.getElementById('min' + inputToCheck.getAttribute('id').slice(-1));
-			var maxNode = document.getElementById('max' + inputToCheck.getAttribute('id').slice(-1));
-			var min = parseFloat(minNode.value);
-			var max = parseFloat(maxNode.value);
-			
-			minNode.setCustomValidity(min < max ? "" : "Maximum is not greater than minimum.");
-			maxNode.setCustomValidity(min < max ? "" : "Maximum is not greater than minimum.");
-			}
-		</script>
+			<form id="cartesianBoundsInput" name="cartesianBoundsInput">
+				<label for="minX">Min x:</label> <input id="minX" type="number" step="any" title="Smallest x to display" required/>
+				<label for="maxX">Max x:</label> <input id="maxX" type="number" step="any" title="Largest x to display" required/>
+				<label for="minY">Min f(x):</label> <input id="minY" type="number" step="any" title="Smallest f(x) to display" required/>
+				<label for="maxY">Max f(x):</label> <input id="maxY" type="number" step="any" title="Largest f(x) to display" required/>
+				<div id="minMaxErrorMessage" class="alert alert-danger" role="alert" hidden>
+					<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+					<span class="sr-only">Error:</span> Maximum must be greater than minimum
+				</div>
+			</form>
 		
-		<form id="functionsInput" name="functionsInput">
-		</form>
-        <button id="addFunctionButton" type="button" class="btn btn-default" onclick="addFunction()" >Add function</button>
+			<form id="functionsInput" name="functionsInput">
+			</form>
+			<button id="addFunctionButton" type="button" class="btn btn-default" onclick="addFunction()" >Add function</button>
 
-            <script id="function-template" type="x-tmpl-mustache">
-                <div class="functionView">
-                    <input value="{{expression}}" class="functionExpression" type="text" required oninput="updateFunctionExpression(this.parentNode)" onchange="updateFunctionExpression(this.parentNode)" />
-                    <input value="{{colour}}" class="functionColour" type="color" onchange="updateFunctionColour(this.parentNode)" />
-                    <button type="button" class="close" aria-label="Close" onclick="deleteFunction(this.parentNode)"><span aria-hidden="true">&times;</span></button>
-                </div>
-            </script>
-			
+			<script id="function-template" type="x-tmpl-mustache">
+				<div class="functionView">
+					<input value="{{expression}}" class="functionExpression" type="text" required oninput="updateFunctionExpression(this.parentNode)" onchange="updateFunctionExpression(this.parentNode)" />
+					<input value="{{colour}}" class="functionColour" type="color" onchange="updateFunctionColour(this.parentNode)" />
+					<button type="button" class="close" aria-label="Close" onclick="deleteFunction(this.parentNode)"><span aria-hidden="true">&times;</span></button>
+				</div>
+			</script>
         </div>
 
 	</div><!-- /.container -->
