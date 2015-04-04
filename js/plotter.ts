@@ -1,4 +1,5 @@
 /// <reference path="jquery.d.ts" />
+/// <reference path="mustache.d.ts" />
 
 "use strict";
 
@@ -82,8 +83,7 @@ function expressionToPlotPoints(expression: string, xValues: number[]): Point[] 
 
 function expressionToPlotPoint(expression: string, xValue: number): Point {
     var parser = math.parser();
-    parser.eval('f(x) = ' + expression);
-    var func = parser.get('f');
+    var func = parser.eval('f(x) = ' + expression);
     return { x: xValue, y: func(xValue) };
 }
 
@@ -220,14 +220,13 @@ function drawVerticalIntersectionLine(cxt: CanvasRenderingContext2D): void {
 }
 
 // Convert a point in the cartesian system to a pixel location to plot
-// TODO: there seems to be a bug where pixels overflow
 function cartesianPointToCanvasPoint(viewport: CartesianViewport, cWidth: number, cHeight: number, cartpoint: Point): Point {
     var viewportWidth = Math.abs(viewport.maxX - viewport.minX);
     var viewportHeight = Math.abs(viewport.maxY - viewport.minY);
 
     var p: Point = {
         x: Math.round((cartpoint.x - viewport.minX) / viewportWidth * cWidth),
-        y: Math.round(cHeight - ((cartpoint.y - viewport.minY) / viewportHeight * cHeight))
+        y: cHeight - Math.round(((cartpoint.y - viewport.minY) / viewportHeight * cHeight))
     };
     if (p.x >= cWidth)
         p.x = NaN;
@@ -333,7 +332,7 @@ function updateCartesianBoundsView(): void {
     (<HTMLInputElement> document.getElementById('maxY')).valueAsNumber = cartesianBounds.maxY;
 }
 
-function addFunction(): void {
+function addFunction(expressionStr: string = ""): void {
     if (typeof addFunction.counter == 'undefined')
         addFunction.counter = 1;
     else
@@ -342,7 +341,7 @@ function addFunction(): void {
     var colour = '#' + ('00000' + (((temp & 4) >> 2) * 0xbf0000 + ((temp & 2) >> 1) * 0xbf00 + (temp & 1) * 0xbf).toString(16)).slice(-6);
 
     // add new empty PlottedFunction to model
-    functions.push({ colour: colour, expression: "" });
+    functions.push({ colour: colour, expression: expressionStr });
 
     // update view
     var template = $('#function-template').html();

@@ -1,4 +1,5 @@
 /// <reference path="jquery.d.ts" />
+/// <reference path="mustache.d.ts" />
 "use strict";
 var CartesianViewport = (function () {
     function CartesianViewport() {
@@ -58,8 +59,7 @@ function expressionToPlotPoints(expression, xValues) {
 }
 function expressionToPlotPoint(expression, xValue) {
     var parser = math.parser();
-    parser.eval('f(x) = ' + expression);
-    var func = parser.get('f');
+    var func = parser.eval('f(x) = ' + expression);
     return { x: xValue, y: func(xValue) };
 }
 function setPixel(imageData, x, y, r, g, b) {
@@ -150,8 +150,8 @@ function drawVerticalIntersectionLine(cxt) {
         var width = Math.ceil(cxt.measureText(printList[printList.length - 1].string).width);
         for (var i = 0; i < functions.length; ++i) {
             try {
-                var p = expressionToPlotPoint(functions[i].expression, xValue);
-                printList.push({ string: "f(x) = " + p.y.toPrecision(4), colour: functions[i].colour });
+                var yValue = expressionToPlotPoint(functions[i].expression, xValue).y;
+                printList.push({ string: "f(x) = " + yValue.toPrecision(4), colour: functions[i].colour });
                 width = Math.max(width, Math.ceil(cxt.measureText(printList[printList.length - 1].string).width));
             }
             catch (e) {
@@ -170,13 +170,12 @@ function drawVerticalIntersectionLine(cxt) {
     }
 }
 // Convert a point in the cartesian system to a pixel location to plot
-// TODO: there seems to be a bug where pixels overflow
 function cartesianPointToCanvasPoint(viewport, cWidth, cHeight, cartpoint) {
     var viewportWidth = Math.abs(viewport.maxX - viewport.minX);
     var viewportHeight = Math.abs(viewport.maxY - viewport.minY);
     var p = {
         x: Math.round((cartpoint.x - viewport.minX) / viewportWidth * cWidth),
-        y: Math.round(cHeight - ((cartpoint.y - viewport.minY) / viewportHeight * cHeight))
+        y: cHeight - Math.round(((cartpoint.y - viewport.minY) / viewportHeight * cHeight))
     };
     if (p.x >= cWidth)
         p.x = NaN;
@@ -258,7 +257,8 @@ function updateCartesianBoundsView() {
     document.getElementById('minY').valueAsNumber = cartesianBounds.minY;
     document.getElementById('maxY').valueAsNumber = cartesianBounds.maxY;
 }
-function addFunction() {
+function addFunction(expressionStr) {
+    if (expressionStr === void 0) { expressionStr = ""; }
     if (typeof addFunction.counter == 'undefined')
         addFunction.counter = 1;
     else
@@ -266,7 +266,7 @@ function addFunction() {
     var temp = addFunction.counter;
     var colour = '#' + ('00000' + (((temp & 4) >> 2) * 0xbf0000 + ((temp & 2) >> 1) * 0xbf00 + (temp & 1) * 0xbf).toString(16)).slice(-6);
     // add new empty PlottedFunction to model
-    functions.push({ colour: colour, expression: "" });
+    functions.push({ colour: colour, expression: expressionStr });
     // update view
     var template = $('#function-template').html();
     var info = Mustache.to_html(template, functions[functions.length - 1]);

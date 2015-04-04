@@ -9,8 +9,8 @@
 	margin: 0 auto;
 }
 
-.functionView>* {
-	vertical-align:middle;
+.functionColour, .functionView>.close {
+    vertical-align:middle;
 }
 
 .close {

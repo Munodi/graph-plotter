@@ -1,81 +1,105 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<meta name="description" content="">
-	<link rel="icon" href="img/favicon.ico">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <link rel="icon" href="img/favicon.ico">
 
-	<title>Graph Plotter</title>
+    <title>Graph Plotter</title>
 
-	<!-- Bootstrap core CSS -->
-	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <!-- Bootstrap core CSS -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
-	<!-- Optional theme -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
-	<!-- Custom styles for this template -->
-	<link href="css/custom-styles.css" rel="stylesheet">
-	
-	<!-- Bootstrap core JavaScript
-	================================================== -->
-	<!-- jquery -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <!-- Custom styles for this template -->
+    <link href="css/custom-styles.css" rel="stylesheet">
 
-	<!-- bootstrap -->
-	<!-- Latest compiled and minified JavaScript -->
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-	
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+    <!-- bootstrap -->
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
     <!-- moustachejs -->
-    <script src ="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
 
     <!-- mathjs -->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/mathjs/1.4.0/math.min.js"></script>
     <!-- js to control everything -->
-	<script src="js/plotter.js"></script>
+    <script src="js/plotter.js"></script>
 
 
 </head>
 
 <body>
 
-	<div class="container">
+    <!--<div class="container">-->
 
-		<header id="page-header">
-			<h1>Graph Plotter</h1>
-		</header>
+    <div class="container">
+        <header id="page-header">
+            <h1>Graph Plotter</h1>
+        </header>
+    </div>
 
-        <div id="plotCanvasHolder">
-			<canvas id="plotCanvas"></canvas>
-		</div>
+    <div id="plotCanvasHolder">
+        <canvas id="plotCanvas"></canvas>
+    </div>
 
-        <div id="controls">
-			<form id="cartesianBoundsInput" name="cartesianBoundsInput">
-				<label for="minX">Min x:</label> <input id="minX" type="number" step="any" title="Smallest x to display" required/>
-				<label for="maxX">Max x:</label> <input id="maxX" type="number" step="any" title="Largest x to display" required/>
-				<label for="minY">Min f(x):</label> <input id="minY" type="number" step="any" title="Smallest f(x) to display" required/>
-				<label for="maxY">Max f(x):</label> <input id="maxY" type="number" step="any" title="Largest f(x) to display" required/>
-				<div id="minMaxErrorMessage" class="alert alert-danger" role="alert" hidden>
-					<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-					<span class="sr-only">Error:</span> Maximum must be greater than minimum
-				</div>
-			</form>
-		
-			<form id="functionsInput" name="functionsInput">
-			</form>
-			<button id="addFunctionButton" type="button" class="btn btn-default" onclick="addFunction()" >Add function</button>
-
-			<script id="function-template" type="x-tmpl-mustache">
-				<div class="functionView">
-					<input value="{{expression}}" class="functionExpression" type="text" required oninput="updateFunctionExpression(this.parentNode)" onchange="updateFunctionExpression(this.parentNode)" />
-					<input value="{{colour}}" class="functionColour" type="color" onchange="updateFunctionColour(this.parentNode)" />
-					<button type="button" class="close" aria-label="Close" onclick="deleteFunction(this.parentNode)"><span aria-hidden="true">&times;</span></button>
-				</div>
-			</script>
+    <div id="controls" class="container">
+        
+        <form id="functionsInput" name="functionsInput row"></form>
+        <div class="row">
+            <div class="col-xs-12">
+                <button id="addFunctionButton" type="button" class="btn btn-default" onclick="addFunction()">Add function</button>
+            </div>
         </div>
 
-	</div><!-- /.container -->
+        <form id="cartesianBoundsInput" name="cartesianBoundsInput">
+            <div class="row">
+                <div class="form-group col-md-3 col-sm-6">
+                    <label for="minX">Min x:</label>
+                    <input id="minX" type="number" step="any" class="form-control input-sm" title="Smallest x to display" required />
+                </div>
+                <div class="form-group col-md-3 col-sm-6">
+                    <label for="maxX">Max x:</label>
+                    <input id="maxX" type="number" step="any" class="form-control input-sm" title="Largest x to display" required />
+                </div>
+                <div class="form-group col-md-3 col-sm-6">
+                    <label for="minY">Min f(x):</label>
+                    <input id="minY" type="number" step="any" class="form-control input-sm" title="Smallest f(x) to display" required />
+                </div>
+                <div class="form-group col-md-3 col-sm-6">
+                    <label for="maxY">Max f(x):</label>
+                    <input id="maxY" type="number" step="any" class="form-control input-sm" title="Largest f(x) to display" required />
+                </div>
+            </div> <!-- .row -->
+            <div id="minMaxErrorMessage" class="alert alert-danger" role="alert" hidden>
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span> Maximum must be greater than minimum
+            </div>
+        </form>
+
+        
+
+        <script id="function-template" type="x-tmpl-mustache">
+            <div class="functionView col-sm-6 col-md-4 form-group" style="display:table; table-layout:auto;">
+                <span class="function-name-fx" style="display: table-cell; white-space: nowrap;">f(x) = &nbsp;</span>
+                <div style="display: table-cell; width: 100%; max-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <input value="{{expression}}" class="functionExpression form-control input-sm" style="width:calc(100% - 6px); display:inline" type="text" required oninput="updateFunctionExpression(this.parentNode.parentNode)" onchange="updateFunctionExpression(this.parentNode.parentNode)" />
+                </div>
+                <input value="{{colour}}" class="functionColour" type="color" onchange="updateFunctionColour(this.parentNode)" style="display: table-cell; white-space: nowrap;" />
+                <span type="button" class="close" aria-label="Close" onclick="deleteFunction(this.parentNode)" style="display: table-cell; white-space: nowrap;">&nbsp;&times; </span>
+            </div>
+        </script>
+    </div>
+
 </body>
 </html>
